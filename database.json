@@ -1,0 +1,9 @@
+{
+    "dev": {
+        "driver": "mysql",
+        "user": "henrysecAdmin",
+        "password": "coffeeBean@8910",
+        "database": "infinityBean",
+        "host": "127.0.0.1"
+    }
+}
