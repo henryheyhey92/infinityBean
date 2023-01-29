@@ -4,9 +4,9 @@
 
 # Learn more from ready-to-use templates: https://www.gitpod.io/docs/introduction/getting-started/quickstart
 
-tasks:
-  - init: npm install
-    command: npm start
+# tasks:
+#   - init: npm install
+#     command: npm start
 
 image:
   file: .gitpod.dockerfile
