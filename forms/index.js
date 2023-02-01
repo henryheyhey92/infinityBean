@@ -3,6 +3,8 @@ const forms = require("forms");
 // create some shortcuts
 const fields = forms.fields;
 const validators = forms.validators;
+const widgets = forms.widgets;
+
 
 var bootstrapField = function (name, object) {
     if (!Array.isArray(object.widget.classes)) { object.widget.classes = []; }
@@ -24,7 +26,7 @@ var bootstrapField = function (name, object) {
     return '<div class="form-group">' + label + widget + error + '</div>';
 };
 
-const createProductForm = (categories) => {
+const createProductForm = (categories, tags) => {
     return forms.create({
         'name': fields.string({
             required: true,
@@ -39,7 +41,7 @@ const createProductForm = (categories) => {
             cssClasses: {
                 label: ['form-label']
             },
-            'validators':[validators.integer()]
+            'validators': [validators.integer()]
         }),
         'description': fields.string({
             required: true,
@@ -49,13 +51,14 @@ const createProductForm = (categories) => {
             }
         }),
         'category_id': fields.string({
-            label:'Category',
+            label: 'Category',
             required: true,
             errorAfterField: true,
             cssClasses: {
                 label: ['form-label']
             },
-            widget: widgets.select(),
+            'widget': widgets.select(),
+            // widget: widgets.select(),
             choices: categories
         }),
         'tags': fields.string({
@@ -65,7 +68,7 @@ const createProductForm = (categories) => {
                 label: ['form-label']
             },
             widget: widgets.multipleSelect(),
-            choices:tags
+            choices: tags
         })
 
     })

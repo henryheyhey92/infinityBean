@@ -14,12 +14,42 @@ exports.setup = function(options, seedLink) {
   seed = seedLink;
 };
 
-exports.up = function(db) {
-  return null;
+exports.up = function (db) {
+  return db.createTable('products_tags', {
+      id: { type: 'int', primaryKey: true, autoIncrement: true },
+      product_id: {
+          type: 'int',
+          notNull: true,
+          unsigned: true,
+          foreignKey: {
+              name: 'products_tags_product_fk',
+              table: 'products',
+              rules: {
+                  onDelete: 'CASCADE',
+                  onUpdate: 'RESTRICT'
+              },
+              mapping: 'id'
+          }
+      },
+      tag_id: {
+          type: 'int',
+          notNull: true,
+          unsigned:true,
+          foreignKey: {
+              name: 'products_tags_tag_fk',
+              table: 'tags',
+              rules: {
+                  onDelete: 'CASCADE',
+                  onUpdate: 'RESTRICT'
+              },
+              mapping: 'id'
+          }
+      }
+  });
 };
 
 exports.down = function(db) {
-  return null;
+  return db.dropTable('products_tags');
 };
 
 exports._meta = {
