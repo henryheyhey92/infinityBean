@@ -10,7 +10,7 @@ const { bootstrapField, createProductForm } = require('../forms');
 router.get('/', async (req, res) => {
     // #2 - fetch all the products (ie, SELECT * from products)
     let products = await Product.collection().fetch({
-        withRelated: ['category']
+        withRelated: ['category', 'tags']
     });
     console.log(products.toJSON());
     res.render('products/index', {
@@ -72,7 +72,7 @@ router.get('/:product_id/update', async (req, res) => {
         'id': parseInt(productId)
     }).fetch({
         require: true,
-        withRelated: ['tags']
+        withRelated: ['tags'] // is it because that is many to may relation?
     });
 
     // fetch all the tags
