@@ -4,6 +4,9 @@ const Product = bookshelf.model('Product', {
     tableName:'products',
     category() { //one to one
         return this.belongsTo('Category')
+    },
+    tags() { // many to many
+        return this.belongsToMany('Tag');
     }
 });
 
@@ -15,4 +18,11 @@ const Category = bookshelf.model('Category',{
 
 })
 
-module.exports = { Product, Category };
+const Tag = bookshelf.model('Tag',{
+    tableName: 'tags',
+    products() {
+        return this.belongsToMany('Product')
+    }
+})
+
+module.exports = { Product, Category, Tag };
