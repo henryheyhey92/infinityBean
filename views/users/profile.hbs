@@ -3,6 +3,7 @@
 {{#block 'content'}}
 <h1>User Profile</h1>
 <ul>
+    <input type="hidden" name="_csrf" value="{{csrfToken}}"/>
     <li>Username: {{user.username}}</li>
     <li>Email:{{user.email}}</li>
 </ul>

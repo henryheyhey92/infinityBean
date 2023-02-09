@@ -1,6 +1,7 @@
 const express = require("express");
 const hbs = require("hbs");
 const wax = require("wax-on");
+const csrf = require('csurf');
 require("dotenv").config();
 
 //for session
@@ -48,6 +49,15 @@ app.use(function (req, res, next) {
 // Share the user data with hbs files
 app.use(function(req,res,next){
     res.locals.user = req.session.user;
+    next();
+})
+
+// enable CSRF
+app.use(csrf());
+
+// Share CSRF with hbs files
+app.use(function(req,res,next){
+    res.locals.csrfToken = req.csrfToken();
     next();
 })
 
