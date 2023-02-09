@@ -28,8 +28,12 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     // retrieve all the tags, many to many
     const allTags = await Tag.fetchAll().map(tag => [tag.get('id'), tag.get('name')]);
     const productForm = createProductForm(allCategories, allTags);
+    
     res.render('products/create', {
-        'form': productForm.toHTML(bootstrapField)
+        'form': productForm.toHTML(bootstrapField),
+        cloudinaryName: process.env.CLOUDINARY_NAME,
+        cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+        cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET
     })
 })
 
@@ -93,6 +97,8 @@ router.get('/:product_id/update', async (req, res) => {
     productForm.fields.cost.value = product.get('cost');
     productForm.fields.description.value = product.get('description');
     productForm.fields.category_id.value = product.get('category_id');
+    // 1 - set the image url in the product form
+    productForm.fields.image_url.value = product.get('image_url');
 
     // fill in the multi-select for the tags
     let selectedTags = await product.related('tags').pluck('id');
@@ -100,7 +106,11 @@ router.get('/:product_id/update', async (req, res) => {
 
     res.render('products/update', {
         'form': productForm.toHTML(bootstrapField),
-        'product': product.toJSON()
+        'product': product.toJSON(),
+        // 2 - send to the HBS file the cloudinary information
+        cloudinaryName: process.env.CLOUDINARY_NAME,
+        cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+        cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET
     })
 
 })
@@ -111,6 +121,7 @@ router.post('/:product_id/update', async (req, res) => {
     const allCategories = await Category.fetchAll().map((category) => {
         return [category.get('id'), category.get('name')];
     })
+    
 
     // fetch the product that we want to update
     const product = await Product.where({
