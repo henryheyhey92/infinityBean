@@ -9,6 +9,9 @@ const { checkIfAuthenticated } = require('../middlewares');
 // import in the Forms
 const { bootstrapField, createProductForm, createSearchForm } = require('../forms');
 
+// import in the DAL
+const dataLayer = require('../dal/products')
+
 // router.get('/', async (req, res) => {
 //     // #2 - fetch all the products (ie, SELECT * from products)
 //     let products = await Product.collection().fetch({
@@ -23,14 +26,12 @@ const { bootstrapField, createProductForm, createSearchForm } = require('../form
 router.get('/', async (req, res) => {
 
     // 1. get all the categories
-    const allCategories = await Category.fetchAll().map((category) => {
-        return [category.get('id'), category.get('name')];
-    })
+    const allCategories = await dataLayer.getAllCategories();
     allCategories.unshift([0, '----']);
 
 
     // 2. Get all the tags
-    const allTags = await Tag.fetchAll().map(tag => [tag.get('id'), tag.get('name')]);
+    const allTags = await dataLayer.getAllTags();
 
     // things that are in categories and tag will be pass into the search form
     // 3. Create search form 
@@ -40,7 +41,7 @@ router.get('/', async (req, res) => {
     searchForm.handle(req, {
         'empty': async (form) => {
             let products = await q.fetch({
-                withRelated: ['category']
+                withRelated: ['category', 'tags']
             })
             res.render('products/index', {
                 'products': products.toJSON(),
@@ -49,7 +50,7 @@ router.get('/', async (req, res) => {
         },
         'error': async (form) => {
             let products = await q.fetch({
-                withRelated: ['category']
+                withRelated: ['category', 'tags']
             })
             res.render('products/index', {
                 'products': products.toJSON(),
@@ -81,7 +82,7 @@ router.get('/', async (req, res) => {
 
 
             let products = await q.fetch({
-                withRelated: ['category']
+                withRelated: ['category', 'tags']
             })
             res.render('products/index', {
                 'products': products.toJSON(),
@@ -94,11 +95,9 @@ router.get('/', async (req, res) => {
 
 router.get('/create', checkIfAuthenticated, async (req, res) => {
     // retrieve one to many
-    const allCategories = await Category.fetchAll().map((category) => {
-        return [category.get('id'), category.get('name')];
-    })
+    const allCategories = await dataLayer.getAllCategories();
     // retrieve all the tags, many to many
-    const allTags = await Tag.fetchAll().map(tag => [tag.get('id'), tag.get('name')]);
+    const allTags = await dataLayer.getAllTags();
     const productForm = createProductForm(allCategories, allTags);
 
     res.render('products/create', {
@@ -112,11 +111,9 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
 router.post('/create', checkIfAuthenticated, async (req, res) => {
 
     // retrieve one to many
-    const allCategories = await Category.fetchAll().map((category) => {
-        return [category.get('id'), category.get('name')];
-    })
+    const allCategories = await dataLayer.getAllCategories();
     // retrieve all the tags, many to many
-    const allTags = await Tag.fetchAll().map(tag => [tag.get('id'), tag.get('name')]);
+    const allTags = await dataLayer.getAllTags();
 
     const productForm = createProductForm(allCategories, allTags);
     productForm.handle(req, {
@@ -147,20 +144,13 @@ router.post('/create', checkIfAuthenticated, async (req, res) => {
 router.get('/:product_id/update', async (req, res) => {
     // retrieve the product
     const productId = req.params.product_id
-    const product = await Product.where({
-        'id': parseInt(productId)
-    }).fetch({
-        require: true,
-        withRelated: ['tags'] // is it because that is many to may relation?
-    });
+    const product = await dataLayer.getProductByID(productId);
 
     // fetch all the tags
-    const allTags = await Tag.fetchAll().map(tag => [tag.get('id'), tag.get('name')]);
+    const allTags = await dataLayer.getAllTags();
 
     // fetch all the categories
-    const allCategories = await Category.fetchAll().map((category) => {
-        return [category.get('id'), category.get('name')];
-    })
+    const allCategories = await dataLayer.getAllCategories();
 
     const productForm = createProductForm(allCategories, allTags);
 
@@ -190,18 +180,11 @@ router.get('/:product_id/update', async (req, res) => {
 // update 
 router.post('/:product_id/update', async (req, res) => {
     // fetch all the categories
-    const allCategories = await Category.fetchAll().map((category) => {
-        return [category.get('id'), category.get('name')];
-    })
-
+    const allCategories = await dataLayer.getAllCategories();
 
     // fetch the product that we want to update
-    const product = await Product.where({
-        'id': req.params.product_id
-    }).fetch({
-        require: true,
-        withRelated: ['tags']
-    });
+    const product_id = req.params.product_id
+    const product = await dataLayer.getProductByID(product_id);
 
     // process the form
     const productForm = createProductForm(allCategories);
