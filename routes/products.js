@@ -7,16 +7,88 @@ const { Product, Category, Tag } = require('../models');
 const { checkIfAuthenticated } = require('../middlewares');
 
 // import in the Forms
-const { bootstrapField, createProductForm } = require('../forms');
+const { bootstrapField, createProductForm, createSearchForm } = require('../forms');
+
+// router.get('/', async (req, res) => {
+//     // #2 - fetch all the products (ie, SELECT * from products)
+//     let products = await Product.collection().fetch({
+//         withRelated: ['category', 'tags']
+//     });
+//     console.log(products.toJSON());
+//     res.render('products/index', {
+//         'products': products.toJSON() // #3 - convert collection to JSON
+//     })
+// })
 
 router.get('/', async (req, res) => {
-    // #2 - fetch all the products (ie, SELECT * from products)
-    let products = await Product.collection().fetch({
-        withRelated: ['category', 'tags']
-    });
-    console.log(products.toJSON());
-    res.render('products/index', {
-        'products': products.toJSON() // #3 - convert collection to JSON
+
+    // 1. get all the categories
+    const allCategories = await Category.fetchAll().map((category) => {
+        return [category.get('id'), category.get('name')];
+    })
+    allCategories.unshift([0, '----']);
+
+
+    // 2. Get all the tags
+    const allTags = await Tag.fetchAll().map(tag => [tag.get('id'), tag.get('name')]);
+
+    // things that are in categories and tag will be pass into the search form
+    // 3. Create search form 
+    let searchForm = createSearchForm(allCategories, allTags);
+    let q = Product.collection();
+
+    searchForm.handle(req, {
+        'empty': async (form) => {
+            let products = await q.fetch({
+                withRelated: ['category']
+            })
+            res.render('products/index', {
+                'products': products.toJSON(),
+                'form': form.toHTML(bootstrapField)
+            })
+        },
+        'error': async (form) => {
+            let products = await q.fetch({
+                withRelated: ['category']
+            })
+            res.render('products/index', {
+                'products': products.toJSON(),
+                'form': form.toHTML(bootstrapField)
+            })
+        },
+        'success': async (form) => {
+            if (form.data.name) {
+                q.where('name', 'like', '%' + form.data.name + '%')
+            }
+
+            if (form.data.category_id && form.data.category_id != "0"
+            ) {
+                q.where('category_id', '=', form.data.category_id)
+            }
+
+            if (form.data.min_cost) {
+                q.where('cost', '>=', form.data.min_cost)
+            }
+
+            if (form.data.max_cost) {
+                q = q.where('cost', '<=', form.data.max_cost);
+            }
+
+            if (form.data.tags) {
+                q.query('join', 'products_tags', 'products.id', 'product_id')
+                    .where('tag_id', 'in', form.data.tags.split(','))
+            }
+
+
+            let products = await q.fetch({
+                withRelated: ['category']
+            })
+            res.render('products/index', {
+                'products': products.toJSON(),
+                'form': form.toHTML(bootstrapField)
+            })
+
+        }
     })
 })
 
@@ -28,7 +100,7 @@ router.get('/create', checkIfAuthenticated, async (req, res) => {
     // retrieve all the tags, many to many
     const allTags = await Tag.fetchAll().map(tag => [tag.get('id'), tag.get('name')]);
     const productForm = createProductForm(allCategories, allTags);
-    
+
     res.render('products/create', {
         'form': productForm.toHTML(bootstrapField),
         cloudinaryName: process.env.CLOUDINARY_NAME,
@@ -121,7 +193,7 @@ router.post('/:product_id/update', async (req, res) => {
     const allCategories = await Category.fetchAll().map((category) => {
         return [category.get('id'), category.get('name')];
     })
-    
+
 
     // fetch the product that we want to update
     const product = await Product.where({

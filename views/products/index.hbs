@@ -1,6 +1,11 @@
 {{#extends 'base'}}
 
 {{#block 'content'}}
+<form method="GET">
+   {{{form}}}
+    <input type="submit" class="mb-3 mt-3 btn btn-primary" value="Search"/>
+</form>
+
 <table class="table">
     <thead>
         <tr>
