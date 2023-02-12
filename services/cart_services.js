@@ -31,7 +31,6 @@ class CartServices {
 
     async getCart() {
         let res = await cartDataLayer.getCart(this.user_id);
-        console.log("This res, ", res);
         return await cartDataLayer.getCart(this.user_id);
     }
 
