@@ -66,6 +66,8 @@ const landingRoutes = require('./routes/landing');
 const productRoutes = require('./routes/products');
 const userRoutes = require('./routes/users');
 const cloudinaryRoutes = require('./routes/cloudinary.js')
+const shoppingCartRoutes = require('./routes/shoppingCart');
+// const checkoutRoutes = require('./routes/checkout');
 
 async function main() {
     // app.get('/', (req, res) => {
@@ -76,6 +78,8 @@ async function main() {
     app.use('/products', productRoutes);
     app.use('/users', userRoutes);
     app.use('/cloudinary', cloudinaryRoutes);
+    app.use('/cart', shoppingCartRoutes);
+    // app.use('/checkout', checkoutRoutes);
 
 }
 
