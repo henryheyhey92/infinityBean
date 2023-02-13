@@ -53,11 +53,23 @@ app.use(function(req,res,next){
 })
 
 // enable CSRF
-app.use(csrf());
+// app.use(csrf());
+const csurfInstance = csrf();
+app.use(function(req,res,next){
+  console.log("checking for csrf exclusion")
+  // exclude whatever url we want from CSRF protection
+  if (req.url === "/checkout/process_payment") {
+    return next();
+  }
+  csurfInstance(req,res,next);
+})
+
 
 // Share CSRF with hbs files
 app.use(function(req,res,next){
-    res.locals.csrfToken = req.csrfToken();
+    if (req.csrfToken) {
+        res.locals.csrfToken = req.csrfToken();
+    }
     next();
 })
 
