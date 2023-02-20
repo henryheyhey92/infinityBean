@@ -1,8 +1,10 @@
 const express = require("express");
 const hbs = require("hbs");
 const wax = require("wax-on");
+const cors = require('cors');
 const csrf = require('csurf');
 require("dotenv").config();
+
 
 //for session
 const session = require('express-session');
@@ -28,6 +30,7 @@ app.use(
         extended: false
     })
 );
+app.use(cors()); //make sure to enable cors before sessions
 
 // set up sessions
 app.use(session({
